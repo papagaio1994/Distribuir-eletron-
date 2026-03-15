@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribuição eletrónica por camadas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="app-grid">
+      <section class="card main-card">
+        <div class="badges">
+          <span class="badge">9.º ano</span>
+          <span class="badge badge-outline">sem orbitais</span>
+        </div>
+
+        <h1>Distribuição eletrónica por camadas</h1>
+        <p class="intro">
+          Explora átomos neutros dos primeiros 20 elementos e treina a distribuição de eletrões pelas camadas.
+        </p>
+
+        <div class="mode-buttons">
+          <button id="btnExplorar" class="btn btn-primary">Explorar</button>
+          <button id="btnTreino" class="btn btn-secondary">Treino</button>
+          <button id="btnAvaliacao" class="btn btn-secondary">Avaliação</button>
+          <button id="btnAleatorio" class="btn btn-secondary">Átomo aleatório</button>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel">
+            <label for="numeroAtomico" class="label">Número atómico (1 a 20)</label>
+            <input id="numeroAtomico" type="number" min="1" max="20" value="11" />
+
+            <div class="info-grid">
+              <div class="info-box">
+                <span class="info-label">Elemento</span>
+                <strong id="elementoNome"></strong>
+              </div>
+              <div class="info-box">
+                <span class="info-label">Símbolo</span>
+                <strong id="elementoSimbolo"></strong>
+              </div>
+              <div class="info-box">
+                <span class="info-label">Protões</span>
+                <strong id="protones"></strong>
+              </div>
+              <div class="info-box">
+                <span class="info-label">Eletrões (átomo neutro)</span>
+                <strong id="eletrones"></strong>
+              </div>
+            </div>
+
+            <div id="explorarBox" class="mode-box"></div>
+
+            <div id="interacaoBox" class="mode-box hidden">
+              <div id="modoMensagem" class="message-box"></div>
+
+              <div id="layerEditors" class="layers"></div>
+
+              <div class="action-buttons">
+                <button id="btnVerificar" class="btn btn-primary">Verificar</button>
+                <button id="btnLimpar" class="btn btn-secondary">Limpar</button>
+                <button id="btnMostrarSolucao" class="btn btn-secondary">Mostrar solução</button>
+                <button id="btnNovoAtomo" class="btn btn-secondary">Novo átomo</button>
+              </div>
+
+              <div class="totals-box">
+                Total colocado: <strong><span id="somaTentativa">0</span></strong> / <span id="totalNecessario">11</span>
+              </div>
+
+              <div id="feedback" class="feedback hidden"></div>
+              <div id="solucao" class="solution hidden"></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="visual-header">
+              <div>
+                <div class="small-label">Visualização do átomo</div>
+                <div class="visual-title"><span id="visualNome"></span> (<span id="visualSimbolo"></span>)</div>
+              </div>
+              <span class="badge" id="visualZ"></span>
+            </div>
+
+            <div class="atom-wrap">
+              <svg id="atomSvg" viewBox="0 0 400 400" aria-label="Visualização do átomo"></svg>
+            </div>
+
+            <div class="help-grid">
+              <div class="info-box help-box">
+                <strong>Número atómico</strong>
+                <p>É o número de protões. Num átomo neutro, também é o número de eletrões.</p>
+              </div>
+              <div class="info-box help-box">
+                <strong>Lê assim</strong>
+                <p id="lerAssim"></p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="card side-card">
+        <h2>Painel do professor</h2>
+
+        <div class="info-box note-box">
+          <strong>Separação dos modos</strong>
+          <p>O modo <em>Treino</em> serve para experimentar. O modo <em>Avaliação</em> é o único que alimenta o painel de avaliação.</p>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-head">
+            <span>Desempenho no treino</span>
+            <strong id="progressoTreinoPct">0%</strong>
+          </div>
+          <div class="progress"><div id="barTreino" class="progress-fill"></div></div>
+          <p>Acertos: <strong id="acertosTreino">0</strong> | Tentativas: <strong id="totalTreino">0</strong></p>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-head">
+            <span>Avaliação</span>
+            <strong id="progressoAvaliacaoPct">0%</strong>
+          </div>
+          <div class="progress"><div id="barAvaliacao" class="progress-fill"></div></div>
+          <p>Acertos: <strong id="acertosAvaliacao">0</strong> | Respostas registadas: <strong id="totalAvaliacao">0</strong></p>
+          <button id="btnReiniciarAvaliacao" class="btn btn-secondary">Reiniciar avaliação</button>
+        </div>
+
+        <div class="info-box note-box">
+          <strong>Limite didático desta app</strong>
+          <p>Esta versão foi feita para o 9.º ano e trabalha apenas a distribuição por camadas nos primeiros 20 elementos. Não aborda orbitais nem configuração eletrónica avançada.</p>
+        </div>
+
+        <div class="info-box note-box">
+          <strong>Sugestão de uso em aula</strong>
+          <p>Primeiro usa o modo <em>Explorar</em>. Depois deixa os alunos mexerem no <em>Treino</em>. Só no fim passas para <em>Avaliação</em>, com respostas registadas em separado.</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
