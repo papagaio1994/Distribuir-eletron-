@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribuição eletrónica por camadas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <div class="layout">
+        <section class="panel main-panel">
+          <div class="badges">
+            <span class="badge fill">9.º ano</span>
+            <span class="badge outline">sem orbitais</span>
+          </div>
+
+          <h1>⚛️ Distribuição eletrónica por camadas</h1>
+          <p class="lead">
+            Explora átomos neutros dos primeiros 20 elementos e treina a distribuição de eletrões pelas camadas.
+          </p>
+
+          <div class="mode-buttons">
+            <button id="btn-explorar" class="mode active">✨ Explorar</button>
+            <button id="btn-treino" class="mode">✅ Treino</button>
+            <button id="btn-avaliacao" class="mode">📝 Avaliação</button>
+            <button id="btn-aleatorio" class="mode secondary">🔀 Átomo aleatório</button>
+          </div>
+
+          <div class="content-grid">
+            <section class="box">
+              <label for="numeroAtomico" class="field-label">Número atómico (1 a 20)</label>
+              <input id="numeroAtomico" type="number" min="1" max="20" value="11" />
+
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">Elemento</div>
+                  <div id="info-elemento" class="info-value"></div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Símbolo</div>
+                  <div id="info-simbolo" class="info-value"></div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Protões</div>
+                  <div id="info-protoes" class="info-value"></div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Eletrões (átomo neutro)</div>
+                  <div id="info-eletrons" class="info-value"></div>
+                </div>
+              </div>
+
+              <div id="explorar-area" class="mode-area"></div>
+              <div id="interativo-area" class="mode-area hidden"></div>
+            </section>
+
+            <section class="box visual-box">
+              <div class="visual-header">
+                <div>
+                  <div class="small-label">Visualização do átomo</div>
+                  <div id="visual-title" class="visual-title"></div>
+                </div>
+                <span id="visual-z" class="badge fill"></span>
+              </div>
+
+              <div class="atom-wrap">
+                <svg id="atom-svg" viewBox="0 0 400 400" aria-label="Visualização do átomo"></svg>
+              </div>
+
+              <div class="tip-grid">
+                <div class="tip-card">
+                  <strong>Número atómico</strong>
+                  <div class="tip-text">É o número de protões. Num átomo neutro, também é o número de eletrões.</div>
+                </div>
+                <div class="tip-card">
+                  <strong>Lê assim</strong>
+                  <div id="tip-ler" class="tip-text"></div>
+                </div>
+              </div>
+
+              <div class="note-card valencia-card">
+                <strong>Eletrões de valência</strong>
+                <div class="tip-text">
+                  São os eletrões do último nível de energia. São os mais afastados do núcleo e são muito importantes nas ligações químicas.
+                </div>
+                <div class="tip-text">
+                  Exemplo: no magnésio, 2 – 8 – 2, os eletrões de valência são <strong>2</strong>.
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="panel side-panel">
+          <h2>Painel do professor</h2>
+
+          <div class="note-card">
+            <strong>Separação dos modos</strong>
+            <div class="tip-text">
+              O modo <em>Treino</em> serve para experimentar. O modo <em>Avaliação</em> é o único que alimenta o painel de avaliação.
+            </div>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-row">
+              <span>Desempenho no treino</span>
+              <strong id="progresso-treino">0%</strong>
+            </div>
+            <div class="progress-bar"><div id="bar-treino" class="progress-fill"></div></div>
+            <div class="progress-stats">Acertos: <strong id="acertos-treino">0</strong> | Tentativas: <strong id="total-treino">0</strong></div>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-row">
+              <span>Avaliação</span>
+              <strong id="progresso-avaliacao">0%</strong>
+            </div>
+            <div class="progress-bar"><div id="bar-avaliacao" class="progress-fill"></div></div>
+            <div class="progress-stats">Acertos: <strong id="acertos-avaliacao">0</strong> | Respostas registadas: <strong id="total-avaliacao">0</strong></div>
+            <button id="btn-reiniciar-avaliacao" class="action outline full">Reiniciar avaliação</button>
+          </div>
+
+          <div class="note-card">
+            <strong>Limite didático desta app</strong>
+            <div class="tip-text">
+              Esta versão foi feita para o 9.º ano e trabalha a distribuição por camadas dos primeiros 20 elementos. Não aborda orbitais nem configuração eletrónica avançada.
+            </div>
+          </div>
+
+          <div class="note-card">
+            <strong>Sugestão de uso em aula</strong>
+            <div class="tip-text">
+              Primeiro usa o modo <em>Explorar</em>. Depois deixa os alunos mexerem no <em>Treino</em>. Só no fim passas para <em>Avaliação</em>. O mini-quiz abaixo pode servir como consolidação final.
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="panel quiz-panel">
+        <div class="badges">
+          <span class="badge fill">consolidação</span>
+          <span class="badge outline">não conta para a avaliação do painel</span>
+        </div>
+
+        <h2>Mini-quiz de escolha múltipla</h2>
+        <p class="lead small-lead">
+          Três perguntas rápidas sobre iões, princípio da energia mínima e eletrões de valência.
+        </p>
+
+        <div id="quiz-grid" class="quiz-grid"></div>
+
+        <div class="action-row top-space">
+          <button id="btn-corrigir-quiz" class="action primary">Corrigir mini-quiz</button>
+          <button id="btn-limpar-quiz" class="action outline">↺ Limpar respostas</button>
+        </div>
+
+        <div id="quiz-resultado" class="note-card hidden top-space"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
