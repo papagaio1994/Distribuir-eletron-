@@ -27,7 +27,7 @@ const SIMBOLOS = {
 };
 
 const CAPACIDADES = [2, 8, 8, 2];
-const NOMES_CAMADAS = ["1.ª camada", "2.ª camada", "3.ª camada", "4.ª camada"];
+const NíveisDeEnergia = ["1.º nível", "2.º nível", "3.º nível", "4.º nível"];
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 const NIVEIS_INFO = [
@@ -312,7 +312,7 @@ function renderInterativoArea() {
         <div class="layer-card">
           <div class="layer-row">
             <div>
-              <div class="layer-title">${NOMES_CAMADAS[i]}</div>
+              <div class="layer-title">${NíveisDeEnergia[i]}</div>
               <div class="layer-subtitle">Máximo nesta app: ${CAPACIDADES[i]} eletrões</div>
             </div>
             <div class="layer-controls">
