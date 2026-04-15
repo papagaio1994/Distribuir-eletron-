@@ -221,8 +221,8 @@ function verificar() {
       : "Muito bem! A distribuição eletrónica está correta.";
   } else {
     state.feedback = state.modo === "avaliacao"
-      ? "Resposta registada na avaliação: o número total está certo, mas a distribuição pelas camadas não está correta."
-      : "Quase! O número total de eletrões está certo, mas a distribuição pelas camadas ainda não está correta.";
+      ? "Resposta registada na avaliação: o número total está certo, mas a distribuição por níveis de energia não está correta."
+      : "Quase! O número total de eletrões está certo, mas a distribuição por níveis de energia ainda não está correta.";
   }
 
   render();
@@ -253,14 +253,14 @@ function renderExplorarArea() {
   area.innerHTML = `
     <div class="rule-card">
       <div><strong>Regra simples</strong></div>
-      <div>Distribuímos os eletrões por camadas: primeiro a 1.ª camada, depois a 2.ª, depois a 3.ª e só depois a 4.ª. Para os primeiros 20 elementos, trabalhamos com a regra prática 2 – 8 – 8 – 2.</div>
+      <div>Distribuímos os eletrões por níveis de energia : primeiro a 1.ª camada, depois a 2.ª, depois a 3.ª e só depois a 4.ª. Para os primeiros 20 elementos, trabalhamos com a regra prática 2 – 8 – 8 – 2.</div>
     </div>
 
     <div class="distribution-list">
       ${distribuicao.map((valor, i) => `
         <div class="distribution-item">
-          <span><strong>${NOMES_CAMADAS[i]}</strong></span>
-          <span class="distribution-pill">${valor} eletrão${valor === 1 ? "" : "s"}</span>
+          <span><strong>${NOMES_NíveisDeEnergia [i]}</strong></span>
+          <span class="distribution-pill">${valor} ${valor === 1 ? "eletrão" : "eletrões"}</span>
         </div>
       `).join("")}
     </div>
