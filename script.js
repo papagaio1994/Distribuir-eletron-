@@ -186,7 +186,7 @@ function reiniciarAvaliacao() {
   render();
 }
 
-function atualizarCamada(index, valor) {
+function atualizar(index, valor) {
   state.tentativa[index] = valor;
   state.feedback = "";
   state.mostrarSolucao = false;
@@ -344,7 +344,7 @@ function renderInterativoArea() {
       const next = button.dataset.action === "inc"
         ? Math.min(CAPACIDADES[index], current + 1)
         : Math.max(0, current - 1);
-      atualizarCamada(index, next);
+      atualizarNiveisDeEnergia(index, next);
     });
   });
 
