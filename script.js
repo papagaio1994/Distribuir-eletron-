@@ -186,7 +186,7 @@ function reiniciarAvaliacao() {
   render();
 }
 
-function atualizar(index, valor) {
+function atualizarNiveisDeEnergia(index, valor) {
   state.tentativa[index] = valor;
   state.feedback = "";
   state.mostrarSolucao = false;
