@@ -259,7 +259,7 @@ function renderExplorarArea() {
     <div class="distribution-list">
       ${distribuicao.map((valor, i) => `
         <div class="distribution-item">
-          <span><strong>${NOMES_NíveisDeEnergia [i]}</strong></span>
+          <span><strong>${NíveisDeEnergia [i]}</strong></span>
           <span class="distribution-pill">${valor} ${valor === 1 ? "eletrão" : "eletrões"}</span>
         </div>
       `).join("")}
