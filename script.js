@@ -104,7 +104,11 @@ const state = {
   totalAvaliacao: 0,
   respostasQuiz: {},
   mostrarCorrecaoQuiz: false,
-  modalAberto: false
+  modalAberto: false,
+  registroId: null,
+  avaliacaoAtiva: false,
+  respostas: {},
+  avaliacao: 0
 };
 
 function distribuirEletrons(numeroAtomico) {
@@ -145,6 +149,9 @@ function getPontuacaoQuiz() {
 }
 
 function setMode(modo) {
+  // Don't allow mode change if evaluation is active
+  if (state.avaliacaoAtiva) return;
+  
   state.modo = modo;
   state.feedback = "";
   state.mostrarSolucao = false;
@@ -171,11 +178,8 @@ function limpar() {
 }
 
 function iniciarAvaliacao() {
-  state.modo = "avaliacao";
-  state.tentativa = [0, 0, 0, 0];
-  state.feedback = "";
-  state.mostrarSolucao = false;
-  render();
+  // Open the registration modal when Avaliação is clicked
+  abrirRegistroModal();
 }
 
 function reiniciarAvaliacao() {
@@ -232,11 +236,52 @@ function verificar() {
 function selecionarRespostaQuiz(idQuestao, indiceOpcao) {
   state.respostasQuiz[idQuestao] = indiceOpcao;
   state.mostrarCorrecaoQuiz = false;
+  // If in active evaluation, store in respostas
+  if (state.avaliacaoAtiva) {
+    state.respostas[idQuestao] = indiceOpcao;
+  }
   renderQuiz();
 }
 
 function corrigirQuiz() {
   state.mostrarCorrecaoQuiz = true;
+  
+  // If in active evaluation, submit to historico and then deactivate
+  if (state.avaliacaoAtiva) {
+    // Calculate score using the same logic as frontend display
+    const acertos = getPontuacaoQuiz();
+    const total = PERGUNTAS_QUIZ.length;
+    
+    console.log(state.registroId, 'CHECK')
+    // Submit to historico edge function
+    const dados = {
+      registro_id: state.registroId,
+      respostas: state.respostas,
+      avaliacao: Math.ceil(acertos / total * 100) / 100
+    };
+    
+    fetch("https://rdtvnzppleokokexbzlp.supabase.co/functions/v1/historico", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dados)
+    })
+      .then(response => {
+        console.log("Histórico enviado com sucesso");
+        state.avaliacaoAtiva = false;
+
+        if (!response.ok) {
+          console.error("BACKEND ERROR:", dados, response.status, response.statusText);
+          throw new Error("Request failed");
+        }
+        render();
+      })
+      .catch(error => {
+        console.error("Erro ao enviar histórico:", error);
+      });
+  }
+  
   renderQuiz();
 }
 
@@ -263,6 +308,12 @@ function fecharRegistroModal() {
   form.reset();
   const errorDiv = document.getElementById("form-error");
   errorDiv.classList.add("hidden");
+  // Reset button state
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = false;
+    submitButton.textContent = "Enviar";
+  }
 }
 
 function validarFormularioRegistro(nome, email) {
@@ -291,6 +342,7 @@ function enviarRegistro(event) {
   const nome = document.getElementById("form-nome").value;
   const email = document.getElementById("form-email").value;
   const errorDiv = document.getElementById("form-error");
+  const submitButton = event.target.querySelector('button[type="submit"]');
   
   const validacao = validarFormularioRegistro(nome, email);
   
@@ -300,35 +352,103 @@ function enviarRegistro(event) {
     return;
   }
   
-  // Prepare data for submission
-  const dados = {
-    nome: nome.trim() || null,
-    email: email.trim() || null
+  // Set loading state
+  const originalText = submitButton.textContent;
+  submitButton.disabled = true;
+  submitButton.textContent = "A carregar...";
+  
+  // Helper function to restore button
+  const restoreButton = () => {
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
   };
   
-  // Send to Supabase edge function
-  fetch("https://rdtvnzppleokokexbzlp.supabase.co/functions/v1/registro", {
-    method: "POST",
+  // Prepare search params
+  const searchParams = new URLSearchParams();
+  if (nome.trim()) searchParams.append("nome", nome.trim());
+  if (email.trim()) searchParams.append("email", email.trim());
+  
+  // First, check if registration already exists
+  fetch(`https://rdtvnzppleokokexbzlp.supabase.co/functions/v1/get-registro?${searchParams.toString()}`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify(dados)
-  })
-  .then(response => {
-    if (response.ok) {
-      errorDiv.classList.add("hidden");
-      fecharRegistroModal();
-      // Optional: Show success message
-      console.log("Registo enviado com sucesso");
-    } else {
-      errorDiv.textContent = "Erro ao enviar o registo. Tenta novamente.";
-      errorDiv.classList.remove("hidden");
     }
   })
+  .then(response => response.json().then(data => ({ status: response.status, data })))
+  .then(({ status, data }) => {
+    // If registration already exists, cache the ID and activate evaluation
+    if (data.id) {
+      state.registroId = data.id;
+      state.avaliacaoAtiva = true;
+      state.modo = "avaliacao";
+      state.respostas = {};
+      state.respostasQuiz = {};
+      state.mostrarCorrecaoQuiz = false;
+      errorDiv.classList.add("hidden");
+      fecharRegistroModal();
+      console.log("Registo já existe, ID: " + state.registroId);
+      render();
+      return;
+    }
+    
+    // If error but no ID found, proceed with registration
+    const dados = {
+      nome: nome.trim() || null,
+      email: email.trim() || null
+    };
+    
+    // Send to Supabase edge function to create new registration
+    fetch("https://rdtvnzppleokokexbzlp.supabase.co/functions/v1/registro", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dados)
+    })
+    .then(response => response.json().then(data => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      if (status === 200 || status === 201) {
+        // Cache the ID from new registration
+        state.registroId = data.id;
+        state.avaliacaoAtiva = true;
+        state.modo = "avaliacao";
+        state.respostas = {};
+        state.respostasQuiz = {};
+        state.mostrarCorrecaoQuiz = false;
+        errorDiv.classList.add("hidden");
+        fecharRegistroModal();
+        console.log("Registo criado com sucesso, ID: " + state.registroId);
+        render();
+      } else if (data.error && data.error.includes("duplicate key value violates unique constraint")) {
+        // Duplicate found after creation attempt - activate evaluation
+        state.avaliacaoAtiva = true;
+        state.modo = "avaliacao";
+        state.respostas = {};
+        state.respostasQuiz = {};
+        state.mostrarCorrecaoQuiz = false;
+        errorDiv.classList.add("hidden");
+        fecharRegistroModal();
+        console.log("Registo já existe");
+        render();
+      } else {
+        errorDiv.textContent = "Erro ao enviar o registo. Tenta novamente.";
+        errorDiv.classList.remove("hidden");
+        restoreButton();
+      }
+    })
+    .catch(error => {
+      console.error("Erro:", error);
+      errorDiv.textContent = "Erro de conexão. Tenta novamente.";
+      errorDiv.classList.remove("hidden");
+      restoreButton();
+    });
+  })
   .catch(error => {
-    console.error("Erro:", error);
-    errorDiv.textContent = "Erro de conexão. Tenta novamente.";
+    console.error("Erro ao verificar registo:", error);
+    errorDiv.textContent = "Erro ao verificar registo. Tenta novamente.";
     errorDiv.classList.remove("hidden");
+    restoreButton();
   });
 }
 
@@ -520,12 +640,12 @@ function renderStaticFields() {
   document.getElementById("visual-z").textContent = `Z = ${z}`;
   document.getElementById("tip-ler").textContent = `Ex.: ${ELEMENTOS[z].toLowerCase()} (Z = ${z}) → ${getDistribuicaoCerta().join(" – ")}.`;
 
-  document.getElementById("btn-explorar").classList.toggle("active", state.modo === "explorar");
-  document.getElementById("btn-treino").classList.toggle("active", state.modo === "treino");
-  document.getElementById("btn-avaliacao").classList.toggle("active", state.modo === "avaliacao");
+  document.getElementById("btn-explorar").classList.toggle("active", state.modo === "explorar" && !state.avaliacaoAtiva);
+  document.getElementById("btn-treino").classList.toggle("active", state.modo === "treino" && !state.avaliacaoAtiva);
+  document.getElementById("btn-avaliacao").classList.toggle("active", state.avaliacaoAtiva || (state.modo === "avaliacao"));
 
-  document.getElementById("explorar-area").classList.toggle("hidden", state.modo !== "explorar");
-  document.getElementById("interativo-area").classList.toggle("hidden", state.modo === "explorar");
+  document.getElementById("explorar-area").classList.toggle("hidden", state.modo !== "explorar" || state.avaliacaoAtiva);
+  document.getElementById("interativo-area").classList.toggle("hidden", state.modo === "explorar" || !state.avaliacaoAtiva);
 }
 
 function renderQuiz() {
@@ -595,9 +715,15 @@ function attachEvents() {
     render();
   });
 
-  document.getElementById("btn-explorar").addEventListener("click", () => setMode("explorar"));
-  document.getElementById("btn-treino").addEventListener("click", () => setMode("treino"));
-  document.getElementById("btn-avaliacao").addEventListener("click", abrirRegistroModal);
+  document.getElementById("btn-explorar").addEventListener("click", () => {
+    if (!state.avaliacaoAtiva) setMode("explorar");
+  });
+  document.getElementById("btn-treino").addEventListener("click", () => {
+    if (!state.avaliacaoAtiva) setMode("treino");
+  });
+  document.getElementById("btn-avaliacao").addEventListener("click", () => {
+    if (!state.avaliacaoAtiva) abrirRegistroModal();
+  });
   document.getElementById("btn-aleatorio").addEventListener("click", () => novaTentativa());
   document.getElementById("btn-reiniciar-avaliacao").addEventListener("click", reiniciarAvaliacao);
   document.getElementById("btn-corrigir-quiz").addEventListener("click", corrigirQuiz);
