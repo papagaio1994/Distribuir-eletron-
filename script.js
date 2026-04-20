@@ -103,7 +103,8 @@ const state = {
   acertosAvaliacao: 0,
   totalAvaliacao: 0,
   respostasQuiz: {},
-  mostrarCorrecaoQuiz: false
+  mostrarCorrecaoQuiz: false,
+  modalAberto: false
 };
 
 function distribuirEletrons(numeroAtomico) {
@@ -243,6 +244,92 @@ function limparQuiz() {
   state.respostasQuiz = {};
   state.mostrarCorrecaoQuiz = false;
   renderQuiz();
+}
+
+// Modal Functions
+function abrirRegistroModal() {
+  const modal = document.getElementById("registration-modal");
+  modal.classList.remove("hidden");
+  state.modalAberto = true;
+  document.body.style.overflow = "hidden";
+}
+
+function fecharRegistroModal() {
+  const modal = document.getElementById("registration-modal");
+  const form = document.getElementById("registration-form");
+  modal.classList.add("hidden");
+  state.modalAberto = false;
+  document.body.style.overflow = "";
+  form.reset();
+  const errorDiv = document.getElementById("form-error");
+  errorDiv.classList.add("hidden");
+}
+
+function validarFormularioRegistro(nome, email) {
+  // Check if at least one field is filled
+  const nomePreenchido = nome.trim().length > 0;
+  const emailPreenchido = email.trim().length > 0;
+  
+  if (!nomePreenchido && !emailPreenchido) {
+    return { valido: false, mensagem: "Por favor, preenche pelo menos o nome ou o email." };
+  }
+  
+  // If email is provided, validate format
+  if (emailPreenchido) {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(email)) {
+      return { valido: false, mensagem: "Por favor, insere um email válido." };
+    }
+  }
+  
+  return { valido: true, mensagem: "" };
+}
+
+function enviarRegistro(event) {
+  event.preventDefault();
+  
+  const nome = document.getElementById("form-nome").value;
+  const email = document.getElementById("form-email").value;
+  const errorDiv = document.getElementById("form-error");
+  
+  const validacao = validarFormularioRegistro(nome, email);
+  
+  if (!validacao.valido) {
+    errorDiv.textContent = validacao.mensagem;
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+  
+  // Prepare data for submission
+  const dados = {
+    nome: nome.trim() || null,
+    email: email.trim() || null
+  };
+  
+  // Send to Supabase edge function
+  fetch("https://rdtvnzppleokokexbzlp.supabase.co/functions/v1/registro", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(dados)
+  })
+  .then(response => {
+    if (response.ok) {
+      errorDiv.classList.add("hidden");
+      fecharRegistroModal();
+      // Optional: Show success message
+      console.log("Registo enviado com sucesso");
+    } else {
+      errorDiv.textContent = "Erro ao enviar o registo. Tenta novamente.";
+      errorDiv.classList.remove("hidden");
+    }
+  })
+  .catch(error => {
+    console.error("Erro:", error);
+    errorDiv.textContent = "Erro de conexão. Tenta novamente.";
+    errorDiv.classList.remove("hidden");
+  });
 }
 
 function renderExplorarArea() {
@@ -510,11 +597,16 @@ function attachEvents() {
 
   document.getElementById("btn-explorar").addEventListener("click", () => setMode("explorar"));
   document.getElementById("btn-treino").addEventListener("click", () => setMode("treino"));
-  document.getElementById("btn-avaliacao").addEventListener("click", iniciarAvaliacao);
+  document.getElementById("btn-avaliacao").addEventListener("click", abrirRegistroModal);
   document.getElementById("btn-aleatorio").addEventListener("click", () => novaTentativa());
   document.getElementById("btn-reiniciar-avaliacao").addEventListener("click", reiniciarAvaliacao);
   document.getElementById("btn-corrigir-quiz").addEventListener("click", corrigirQuiz);
   document.getElementById("btn-limpar-quiz").addEventListener("click", limparQuiz);
+  
+  // Modal event listeners
+  document.getElementById("modal-close").addEventListener("click", fecharRegistroModal);
+  document.getElementById("modal-overlay").addEventListener("click", fecharRegistroModal);
+  document.getElementById("registration-form").addEventListener("submit", enviarRegistro);
 }
 
 attachEvents();
